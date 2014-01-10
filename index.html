@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<script src="http://www.stuartathompson.com/globedev/base/jquery.js" type="text/javascript"></script>
+<link rel="stylesheet" href="http://beta.images.theglobeandmail.com/media/www/css/global.fonts.css">
+<script src="http://www.stuartathompson.com/globedev/base/raphael-min.js"></script>
+<script src="http://www.stuartathompson.com/globedev/base/jquery.dataTables.min.js"></script>
+
+<script src="http://www.stuartathompson.com/globedev/base/jquery-ui-slider-autocomplete.js"></script>
+<link rel="stylesheet" href="http://www.stuartathompson.com/globedev/base/ui-lightness/jquery-ui-1.8.21.custom.css" />
+
+<style type="text/css">
+a{outline:none;}
+body {
+    background: white;
+    color: #333;
+    font: normal normal 12px/1.5 Verdana, Helvetica, Arial, sans-serif;
+}
+#gi{
+	width:940px;
+	margin:0 auto;
+	position: relative;
+}
+#gi h2{
+	font-family:"PrattHeavy",sans-serif;
+	font-weight:normal;
+}
+#gi h3{
+	font-family:"PrattHeavy",sans-serif;
+	font-weight:normal;
+	font-size:13px;
+}
+.gi-button{
+	float:left;
+	margin-top:10px;
+}
+.gi-button a{
+	background-color:#d60000;
+	color:white !important;
+	text-transform: uppercase;
+	font-size:10px;
+	text-decoration: none;
+	padding:6px 10px;
+	font-weight:bold;
+	border-radius: 5px;
+	display:block;
+}
+.nogo{
+	background-color:#8e8e8e !important;
+	cursor:default;
+}
+.compare{
+	display:block;
+	width:21px;
+	height:21px;
+	overflow:hidden;
+}
+.compare:hover img{
+	margin-top:-20px;
+}
+.tooltip{
+	position: absolute;
+	z-index: 1000;
+	width:250px;
+	font-size:12px;
+	background-color:white;
+	border:1px solid #b0b0b0;
+	padding:10px;
+	left:0;
+	top:51px;
+	text-align: center !important;
+}
+.tooltip #x{
+	width: 10px;
+height: 10px;
+position: absolute;
+right: 5px;
+top: 5px;
+cursor: pointer;
+background-image: url('http://www.theglobeandmail.com/static/national/sunshine2011/list/close.gif?2');
+}
+.tooltip .depth-corner{
+width: 21px;
+height: 11px;
+background-image: url('http://www.theglobeandmail.com/static/national/sunshine2011/list/corner.png');
+position: absolute;
+left: 88px;
+top: -11px;
+}
+
+.tooltip h2{
+	font-family:Verdana,sans-serif;
+	font-size:12px;
+}
+.tooltip h2 div{
+	font-family:"PrattHeavy",sans-serif;
+	font-size:15px;
+}
+.tooltip .depth-cell{
+	float: left;
+width: 125px;
+padding-bottom: 19px;
+border-bottom: 1px solid #ececec;
+margin-bottom: 10px;
+border-top: 1px solid #ececec;
+padding-top: 10px;
+}
+.tooltip .depth-cell div{
+	font-size:25px;
+	font-family:"PrattHeavy",sans-serif;
+}
+.gi-button a:hover, .gi-button a:focus{
+	background-color:rgb(236, 43, 43);
+}
+#gi-loader{
+	display:none;
+	margin-left: 16px !important;
+}
+.gi-unit{
+	float:left;
+	position: relative;
+	width:420px;
+	padding-right:50px;
+}
+.gi-unit.full{
+	width:100%;
+	border-top:1px solid rgb(213, 213, 213);
+	margin-top:40px;
+}
+.gi-unit.second{
+	margin-right:0;
+}
+#salary-container{
+	margin-top:5px;
+	float:left;
+}
+#salary-container label{
+	width:400px !important;
+	padding-bottom:15px;
+}
+.gi-unit.second label span{
+	font-family:Helvetica,sans-serif;
+	color:rgb(160, 160, 160);
+}
+#benefits-slider,#salary-slider{
+	margin-top:8px;
+	width:252px;
+}
+#benefits-slider .ui-widget-header, #salary-slider .ui-widget-header{
+	background:rgb(213, 213, 213);
+}
+#gi label{
+	width:100px;
+	display:block;
+	float:left;
+	line-height:2;
+}
+#gi input{
+	padding:5px;
+	width:252px;
+	font-size:12px;
+	border:1px solid rgb(213, 213, 213);
+	border-radius: 5px;
+	margin-bottom:5px;
+	outline:none;
+}
+#gi input:focus{
+	border:1px solid #b0b0b0;
+}
+#gi-error,#gi-loader{
+	color:#b0b0b0;
+	font-weight:bold;
+	margin: 16px 0 0 35px;
+	height:15px;
+	float:left;
+}
+#gi-error span{
+	display:none;
+}
+.gi-clearfloat{
+	clear:both;
+	width:100%;
+	height:2px;
+}
+#sunshine{
+	float:left;
+	width:100%;
+	min-height:2px;
+	clear:both;
+	position: relative;
+}
+#now-showing{
+	position: absolute;
+	left: 0;
+	top: 41px;
+}
+/* Data Tables */
+.fg-toolbar{
+background: none !important;
+color: #b0b0b0;
+padding-top: 12px;
+margin-bottom: 10px;
+float: left;
+width: 100%;
+padding-bottom: 10px;
+border-bottom: 1px solid rgb(213, 213, 213);
+border-top: 1px solid rgb(213, 213, 213);
+margin-top: 40px;
+border-left:0;
+border-right:0;
+padding-top:50px;
+}
+
+#data-table_wrapper{
+	float:left;
+	width:100%;
+}
+
+#data-table{
+border-spacing: 0;
+border-collapse: collapse;
+width:100%;
+}
+#data-table .gi-button a{
+	background-color:white;
+}
+#data-table .gi-button a.show{
+	background-color:#b0b0b0;
+}
+#data-table .gi-button a.show:hover{
+	background-color:#da161f;
+}
+#data-table tr td:first-child{
+}
+.even{
+}
+#data-table td{
+padding: 10px;
+margin: 5px 0;
+border-bottom:1px solid rgb(213, 213, 213);
+font-family:Arial,Helvetica,sans-serif;
+vertical-align: top;
+position: relative;
+}
+.loader-container{
+	position: relative;
+}
+#data-table td span,#data-table th span{
+	display:block;
+	text-align:right;
+}
+.dataTables_paginate,.dataTables_paginate span, .dataTables_paginate a{
+	float:left;
+}
+.dataTables_info{
+	margin-top:10px;
+}
+.dataTables_length label{
+	width:200px !important;
+	margin-top: 4px;
+}
+.dataTables_filter label{
+	width: 400px !important;
+}
+.dataTables_filter input{
+	margin-left: 17px;
+}
+#data-table tr td{
+	text-align:left;
+}
+#data-table tr td:first-child{
+	text-align:left;;
+}
+#data-table th{
+	text-align:left;
+	font-size:12px;
+	color:#b0b0b0;
+	font-weight:normal;
+	text-transform: uppercase;
+	font-family:Arial,Helvetica,sans-serif;
+	padding:10px;
+	margin:5px 0;
+}
+#data-table tr th:first-child{
+	text-align: left;
+}
+#data-table a{
+	color:#da161f;
+	text-decoration: none;
+}
+#data-table_length,#data-table_info,#data-table_paginate{
+}
+
+
+/* Smartphones -------------------------------*/
+@media screen and (max-width: 480px) {
+	#gi p, #gi,.gi-chart,#data-table,#gi-deck,#data-table_wrapper,.gi-unit{
+		margin-left:0;
+		padding:0;
+		width:100% !important;
+	}
+	#now-showing{
+		right:0;
+		top:50px;
+		font-size:13px;
+	}
+	#salary-slider,#benefits-slider{
+		margin-top:20px;
+	}
+	#gi-search{
+		margin-top:20px;
+		font-size:16px;
+	}
+	.gi-unit label,.gi-unit input{
+		width:100%;
+		font-size:12px;
+	}
+	.gi-unit.second{
+		margin-top:20px;
+		padding-top:10px;
+		border-top:1px solid #ececec;
+	}
+	#data-table_filter label, #data-table_filter input{
+		clear:both;
+		float:left;
+		width:80%;
+		margin:0;
+		
+	}
+}
+
+</style>
+<script type="text/javascript">
+jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+    "currency-pre": function ( a ) {
+        a = (a==="-") ? 0 : a.replace( /[^\d\-\.]/g, "" );
+        return parseFloat( a );
+    },
+ 
+    "currency-asc": function ( a, b ) {
+        return a - b;
+    },
+ 
+    "currency-desc": function ( a, b ) {
+        return b - a;
+    }
+} );
+
+</script>
+<script type="text/javascript">
+$('document').ready(function(){
+function addCommas(nStr)
+{
+	nStr += '';
+	x = nStr.split('.');
+	x1 = x[0];
+	x2 = x.length > 1 ? '.' + x[1] : '';
+	var rgx = /(\d+)(\d{3})/;
+	while (rgx.test(x1)) {
+		x1 = x1.replace(rgx, '$1' + ',' + '$2');
+	}
+	return x1 + x2;
+}
+
+
+
+
+var defaultData = [
+  [
+   "STUART",
+   "SEEDHOUSE",
+   "Ontario Power Generation",
+   "Senior Vice President, Darlington",
+   941.76,
+   520248.08
+  ],
+  [
+   "PAUL",
+   "PASQUET",
+   "Ontario Power Generation",
+   "Senior Vice President, Nuclear Programs & Training",
+   2868.48,
+   522059.2
+  ],
+  [
+   "GLENN",
+   "JAGER",
+   "Ontario Power Generation",
+   "Senior Vice President, Pickering A",
+   2808.0,
+   523949.48
+  ],
+  [
+   "GERALD R.",
+   "SAVOIE",
+   "Hôpital Montfort",
+   "Président-directeur général",
+   3520.26,
+   527596.2
+  ],
+  [
+   "MICHAEL",
+   "PECKHAM",
+   "Ontario Power Generation",
+   "Vice President, Projects & Modifications",
+   2284.8,
+   530499.96
+  ],
+  [
+   "THOMAS",
+   "HUDSON",
+   "Ontario Institute for Cancer Research",
+   "President & Chief Scientific Officer",
+   408.06,
+   534546.6
+  ],
+  [
+   "BRUCE",
+   "BOLAND",
+   "Ontario Power Generation",
+   "Senior Vice President, Corporate Affairs",
+   3156.48,
+   548212.18
+  ],
+  [
+   "DAVID",
+   "BRENNAN",
+   "Ontario Power Generation",
+   "Senior Vice President, Law & General Counsel",
+   4967.04,
+   548900.04
+  ],
+  [
+   "GADI",
+   "MAYMAN",
+   "Ontario Financing Authority",
+   "Chief Executive Officer",
+   599.55,
+   559048.12
+  ],
+  [
+   "KENT",
+   "WOMACK",
+   "University of Toronto",
+   "Professor of Finance",
+   611.76,
+   560928.04
+  ],
+  [
+   "COLIN",
+   "ANDERSEN",
+   "Ontario Power Authority",
+   "Chief Executive Officer",
+   871.63,
+   573027.0
+  ],
+  [
+   "PIERRE",
+   "TREMBLAY",
+   "Ontario Power Generation",
+   "Chief Nuclear Operating Officer",
+   3929.76,
+   575200.48
+  ],
+  [
+   "ROBERT",
+   "ROBERTS",
+   "University of Ottawa Heart Institute",
+   "President & Chief Executive Officer",
+   291.6,
+   596317.58
+  ],
+  [
+   "PAUL M.",
+   "MURPHY",
+   "Independent Electricity System Operator",
+   "President & Chief Executive Officer",
+   1544.32,
+   605950.28
+  ],
+  [
+   "DAVID L.",
+   "JOHNSTON",
+   "University of Waterloo",
+   "President & Vice Chancellor",
+   0.0,
+   610506.04
+  ],
+  [
+   "DEBBIE",
+   "SEVENPIFER",
+   "Niagara Health System",
+   "President & Chief Executive Officer",
+   3886.87,
+   618300.0
+  ],
+  [
+   "HOWARD",
+   "WETSTON",
+   "Ontario Securities Commission",
+   "Chair",
+   4292.76,
+   627495.38
+  ],
+  [
+   "WILLIAM",
+   "MORIARTY",
+   "University of Toronto",
+   "President and Chief Executive Officer, University of Toronto Asset Management Corporation",
+   1902.72,
+   655995.0
+  ],
+  [
+   "DONN",
+   "HANBIDGE",
+   "Ontario Power Generation",
+   "Senior Vice President & Chief Financial Officer",
+   3795.84,
+   670540.28
+  ],
+  [
+   "BARRY",
+   "MCLELLAN",
+   "Sunnybrook Health Sciences Centre",
+   "President/Chief Executive Officer",
+   5184.84,
+   703311.18
+  ],
+  [
+   "ALBERT",
+   "SWEETNAM",
+   "Ontario Power Generation",
+   "Executive Vice President, Nuclear Projects",
+   4752.0,
+   719985.0
+  ],
+  [
+   "JOHN",
+   "MURPHY",
+   "Ontario Power Generation",
+   "Executive Vice President, Hydro",
+   4627.08,
+   755693.03
+  ],
+  [
+   "WAYNE",
+   "ROBBINS",
+   "Ontario Power Generation",
+   "Chief Nuclear Officer",
+   4431.0,
+   893527.24
+  ],
+  [
+   "LAURA",
+   "FORMUSA",
+   "Hydro One",
+   "President & Chief Executive Officer",
+   2561.28,
+   961963.0
+  ],
+  [
+   "WILLIAM",
+   "ROBINSON",
+   "Ontario Power Generation",
+   "Executive Vice President, Business Transformation Project",
+   4408.8,
+   972641.88
+  ]
+ ];
+mobileSafeData = defaultData;
+if($('#gi').width() < 490){
+	mobileSafeData = [];
+	$.each(defaultData, function(i,d){
+		mobileSafeData.push([d[0],d[1],d[5]]);
+	})
+}
+
+var limit = 5000;
+/* - Check the browser and determine the viz - */
+    var userAgent = navigator.userAgent.toLowerCase();
+
+    // Figure out what browser is being used.
+    var Browser = {
+        Version: (userAgent.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1],
+        Chrome: /chrome/.test(userAgent),
+        Safari: /webkit/.test(userAgent),
+        Opera: /opera/.test(userAgent),
+        IE: /msie/.test(userAgent) && !/opera/.test(userAgent),
+        Mozilla: /mozilla/.test(userAgent) && !/(compatible|webkit)/.test(userAgent),
+        Check: function() { alert(userAgent); }
+    };
+
+	if(Browser.Chrome){
+		limit = 10000;
+	}
+    if (Browser.IE) {
+        limit = 1000;
+    }
+    if($('#gi').width() < 490){
+    	limit = 100;
+    }
+   	if(Browser.Mozilla){
+   		limit = 5000;
+   	}
+ 
+/* - jQuery Sliders - */
+var minSal = 100000,
+	maxSal = 1000000,
+	minBen = 0,
+	maxBen = 10000
+
+$('#salary-slider').slider({
+	range:true,
+	min:minSal,
+	max:maxSal,
+	values:[minSal,maxSal],
+	slide: function( event, ui ) {
+    	$( "#salary-amount" ).text( "$" + addCommas(ui.values[ 0 ]) + " - $" + addCommas(ui.values[ 1 ]) );
+    	minSal = ui.values[0];
+    	maxSal = ui.values[1];
+    }
+});
+/*$('#benefits-slider').slider({
+	range:true,
+	min:minBen,
+	max:maxBen,
+	values:[minBen,maxBen],
+    slide: function( event, ui ) {
+    	$( "#benefits-amount" ).text( "$" + addCommas(ui.values[ 0 ]) + " - $" + addCommas(ui.values[ 1 ]) );
+    	minBen = ui.values[0];
+    	maxBen = ui.values[1];
+    }
+});
+*/
+
+/* - Search and populate functions - */
+var id2013 = '1tOx1REFq2G3PcCWBq0RAvA9Zgc8zIFgH9DVUCf0',
+	id2012 = '1U8jcMwxCfcIAp0OoX1J-3gtr2b5gEozTksiwNEI',
+	select = '*';
+
+if($('#gi').width() < 490){
+	select = 'firstname,lastname,salary';
+}
+var searchCount = 0;
+function goSearch(where){
+$.ajax({
+	url: "https://www.googleapis.com/fusiontables/v1/query/?sql=SELECT%20" + select + "%20FROM%20" + id2013 + "%20WHERE%20" + where + "%20LIMIT%20" + limit + "&key=AIzaSyDWBQnLqOcoYr1ngFvYNvstnYZy2ENodtI",
+	dataType: 'jsonp',
+	success:function(data){
+		searchCount++;
+		if(searchCount == 6){
+			$('#gi-search').addClass('nogo');
+			$('#pre-search').addClass('nogo');
+			$('#gi-error span').text('Your search limit has been reached. Please wait five minutes and try again.').show();
+			$('#gi-error').css('width',300);
+			$('#gi-loader').hide();
+		} else {
+		$('#gi-search').removeClass('nogo')
+		if(typeof data.rows != 'undefined') { 
+			$('#gi-error span').hide();
+			createTable(data.rows) 
+			if(data.rows.length == limit){
+				$('#now-showing span').append('<span style="font-family:Verdana,sans-serif;font-size: 12px;margin-left: 14px;">(Note: Only ' + addCommas(limit) + ' records can be displayed. Please narrow your search.)</span>');
+			}
+		} else {
+			$('#gi-loader').hide();
+			$('#gi-error span').show();
+		};
+		}
+	}
+})
+}
+
+var colleges = [];
+$('.test-click').click(function(){
+	callData('colleges')
+})
+
+var baseUrl = 'http://www.stuartathompson.com/globedev/base/sunshine-images/sunshine2013-';
+function callData(url){
+  ajaxUrl = baseUrl + url + ".csv" + "?c";
+  var ajaxCall = $.ajax(ajaxUrl).done(function(data){
+  	var rows = [];
+  	var j = 0,
+  		k = 0;
+  	$.each(data.split(','), function(i,d){
+  		if(j == 0){
+  			rows[k] = [d];
+  		} else {
+  			rows[k].push(d);
+  		}
+  		j++;
+  		if(j>5) j = 0,k++;
+  	})
+    createTable(rows);
+  });
+}
+
+function searchArchive(where,sal,ben,row){
+	// Search previous year 
+	$.ajax({
+		url: "https://www.googleapis.com/fusiontables/v1/query/?sql=SELECT%20" + select +"%20FROM%20" + id2012 + "%20WHERE%20" + where + "&key=AIzaSyDWBQnLqOcoYr1ngFvYNvstnYZy2ENodtI",
+		dataType: 'jsonp',
+		success:function(data){
+			row.find('.loader-container').append('<div class="tooltip"></div>');
+			$('.tempload').hide();
+			row.find('.gi-search-icon').show();
+			if(typeof data.rows != 'undefined' && data.rows.length == 1) { 
+				archiveResults(data.rows[0],sal,ben,row) 
+			} else {
+				$('.tooltip').html('<div id="popup">'
+				+ '<div id="x"></div>'
+				+ '<div class="depth-corner"></div>'
+				+ '<div style="color:#8e8e8e;padding:10px 0">An identical match was not found.</div></div>');
+			};
+		}
+	})
+}
+
+function archiveResults(data,sal,ben,row){
+	sal = parseInt(sal.replace(/[,$]/g,''));
+	ben = parseInt(ben.replace(/[,$]/g,''));
+	var newSal = data[4],
+		newBen = data[5],
+		salDif = Math.round(((sal-newSal)/Math.abs(newSal))*100),
+		benDif = Math.round(((ben-newBen)/Math.abs(newBen))*100),
+		salCol = '#d60000',
+		benCol = '#d60000';
+		
+	if(salDif>0) salCol = 'green', salDif = '+' + salDif;
+	if(benDif>0) benCol = 'green', benDif = '+' + benDif;
+
+	var content = '<div id="popup">'
+				+ '<div id="x"></div>'
+				+ '<div class="depth-corner"></div>'
+				+ '<h2>Change since 2011<br /><div class="titleCase">' + data[0] + ' ' + data[1] + '</div></h2>'
+				+ '<div class="depth-table">'
+				+ '<div class="depth-cell"><div style="color:' + salCol + '">' + salDif + '%</div><strong>Benefits</strong><br>($' + addCommas(newSal.toFixed(2)) + ')</div><div class="depth-cell"><div style="color:' + benCol + '">' + benDif + '%</div><strong>Salary</strong> <br>($' + addCommas(newBen.toFixed(2)) + ')</div></div><p align="center"><small><em>Based on an identical<br>name and employer.</em></small></p></div>';
+				
+	$('.tooltip').html(content);
+
+}
+
+var madeOnce = false;
+
+function createTable(data){
+	aaData = data;
+	if($('#gi').width() > 490){
+	// Push search row
+	$.each(aaData, function(){
+		this.unshift('<div class="loader-container"><a class="compare gi-search-icon" href="#search" title="Search the archives for this individual"><img src="sunshine-images/search.png" /></a></div>');
+//		this.push('<a class="compare gi-flag-icon" href="#flag" title="Flag this record as important"><img src="sunshine-images/flag.png" /></a>');
+	});
+	}
+
+	$('#gi-loader').hide();
+	
+	if(madeOnce) oTable.fnDestroy();
+	madeOnce = true;
+	
+	if($("#gi").width() > 490){
+		var aoColumns = [
+		{"sTitle":"<span></span>"},
+				{"sTitle":"First name"},
+				{"sTitle":"Last name"},
+				{"sTitle":"Department"},
+				{"sTitle":"Position"},
+				{"sTitle":"<span>Benefits</span>",
+				"sType":"currency",
+				"fnRender":function(obj){
+					return '<span>$' + addCommas(parseInt(obj.aData[ obj.iDataColumn ]).toFixed(2)) + '</span>';
+				}},
+				{"sTitle":"<span>Salary</span>",
+				"sType":"currency",
+				"fnRender":function(obj){
+					return '<span>$' + addCommas(parseInt(obj.aData[ obj.iDataColumn ]).toFixed(2)) + '</span>';
+				}}
+				]
+	} else {
+		var aoColumns = [{"sTitle":"First name"},
+				{"sTitle":"Last name"},
+				{"sTitle":"<span>Salary</span>",
+				"sType":"currency",
+				"fnRender":function(obj){
+					return '<span>$' + addCommas(obj.aData[ obj.iDataColumn ].toFixed(2)) + '</span>';
+				}}
+				]
+	}
+	oTable = $('#data-table').html('')
+		.dataTable({
+			"aaData":aaData,
+			"aoColumns": aoColumns,
+			"oLanguage":{
+				"sSearch":"Filter results:"
+			},
+			"aaSorting":[[5,"desc"]],
+			"bJQueryUI":"ui-lightness",
+			"iDisplayLength":50
+		})
+}
+
+function prepSearch(){
+	if(!$('#gi-search').hasClass('nogo')){
+	var matches = [];
+	$('#input input').each(function(i){
+		var val = $(this).val();
+		var name = $(this).attr('name');
+		if(val != ''){
+	
+			if(name == 'firstname' || name == 'lastname') val = val.toUpperCase();
+		
+			matches.push('' + $(this).attr('name') + ' CONTAINS IGNORING CASE \'' + val + '\'');
+		
+		}
+	});
+	// Add benefits and salary ranges
+	matches.push('benefits >= ' + minBen + ' and benefits <= ' + maxBen);
+	matches.push('salary >= ' + minSal + ' and salary <= ' + maxSal);
+
+	var where = '';
+	$.each(matches,function(i,match){
+		where = where + match;
+		if(i!=matches.length-1) where = where + ' AND ';
+	});
+
+		$('#gi-loader').show();
+		$('#gi-error span').hide();
+		$('#now-showing span').text("Your search results");
+		$('#gi-search').addClass('nogo');
+		goSearch(where);
+	}
+}
+
+
+// Init the viz
+ createTable(mobileSafeData);
+
+
+/* - Controls - */
+$('#gi-search').click(function(){
+	prepSearch();
+	return false;
+})
+
+$('input').keyup(function(e){
+	if(event.keyCode == 13) prepSearch();
+})
+
+$('.gi-search-icon').live('click',function(){
+	$('.tooltip').remove();
+	$(this).hide().after('<img class="tempload" src="http://beta.images.theglobeandmail.com/static/templates/preloader/chart-loading-white-35x35.gif" width="15" height="15" /></div>');
+
+	var row = $(this).parents('tr');
+	var firstname = row.find('td').eq(1).text(),
+		lastname = row.find('td').eq(2).text(),
+		department = row.find('td').eq(3).text(),
+		sal = row.find('td').eq(5).text(),
+		ben = row.find('td').eq(6).text();
+
+	var where = 'firstname = \'' + firstname + '\' and lastname = \'' + lastname + '\' and department = \'' + department + '\'';
+	
+	searchArchive(where,sal,ben,row);
+
+	return false;
+})
+/*
+$('.gi-flag-icon').live('click', function(){
+	if(!$(this).hasClass('nogo')){
+	var $flag = $(this);
+	var row = $(this).parent().parent();
+	var firstname = row.find('td').eq(1).text(),
+		lastname = row.find('td').eq(2).text(),
+		department = row.find('td').eq(3).text(),
+		sal = row.find('td').eq(5).text(),
+		ben = row.find('td').eq(6).text();
+	$(this).hide().after('<div id="tempload" style="margin-top:3px;margin-left:1px"><img id="tempload" src="http://beta.images.theglobeandmail.com/static/templates/preloader/chart-loading-white-35x35.gif" width="15" height="15" /></div>');
+	setTimeout(function(){
+		$('#tempload').remove();
+		$flag.addClass('nogo').show().find('img').css({'margin-top':-19});
+	},1000)
+	}
+})
+*/
+$('.tooltip #x').live('click',function(){
+	$(this).parent().parent().remove();
+})
+
+var savedSearches = ['salary > 610505','benefits > 10000','department CONTAINS IGNORING CASE \'Hydro One\'','department CONTAINS IGNORING CASE \'Toronto Transit Commission\'','department CONTAINS IGNORING CASE \'Toronto District School Board\'','firstname = *'];
+$('#gi #pre-search').live('change',function(){
+	if(!$(this).hasClass('nogo')){
+		$('#gi-loader').show();
+		$('#gi-error span').hide();
+		$('#now-showing span').text($('#pre-search option:selected').text());
+		$('#gi-search').addClass('nogo');
+		goSearch(savedSearches[$('#pre-search option:selected').index()]);
+		$('.gi-unit input').eq(2).val($('#pre-search option:selected').text());
+	}
+})
+
+var availableTags = [
+      "ActionScript",
+      "AppleScript",
+      "Asp",
+      "BASIC",
+      "C",
+      "C++",
+      "Clojure",
+      "COBOL",
+      "ColdFusion",
+      "Erlang",
+      "Fortran",
+      "Groovy",
+      "Haskell",
+      "Java",
+      "JavaScript",
+      "Lisp",
+      "Perl",
+      "PHP",
+      "Python",
+      "Ruby",
+      "Scala",
+      "Scheme"
+    ];
+$('#gi-autocomplete').autocomplete({
+	source:availableTags
+});
+})
+</script>
+<style>
+.ui-autocomplete{
+	width:225px !important;
+	display:block !important;
+}
+</style>
+<div id="gi">
+<div id="gi-deck" style="width:620px;padding-top:40px;">
+	<p>The 2011 Public Sector Salary Disclosure list was released today, detailing the names, positions, salaries and taxable benefits of public employees paid $100,000 or more.
+
+<p>Use the table below to search through the list. You can customize your own search or see a ready-made list of key organizations and highest earners. Click the magnifying glass icon to compare to the previous year's results. 
+</div>
+	<div id="input">
+		<div class="gi-unit full">
+		</div>
+		<div class="gi-clearfloat"></div>
+		<div class="gi-unit">
+			<h3>Search the entire 2013 Sunshine List</h3>
+			<label for="firstname">First name:</label> <input name="firstname" type="text"></input><br />
+			<label for="lastname">Last name:</label> <input name="lastname" type="text"></input><br />
+			<label for="department">Department:</label> <input id="gi-autocomplete" name="department" type="text"></input><br />
+			<label for="position">Position:</label> <input name="position" type="text"></input><br />
+			<label for="salary">Salary range: </label>
+			<div id="salary-container">
+				<span id="salary-amount" class="gi-amount">$100,000 - $1,000,000</span>
+				<div id="salary-slider"></div>
+			</div>
+			
+			<!--<label for="benefits">Benefit range: <span id="benefits-amount" class="gi-amount">$0 - $10,000</span></label><br />
+			<div id="benefits-slider"></div>-->
+<div class="gi-clearfloat"></div>
+			<div class="gi-button"><a href="#go" id="gi-search">Search</a></div>
+			<div id="gi-loader"><img src="http://beta.images.theglobeandmail.com/static/templates/preloader/chart-loading-white-35x35.gif" width="15" height="15" /></div>
+			<div id="gi-error"><span>Sorry, there were no matching results.</span></div>
+	</div>
+
+		</div>
+		<div class="gi-unit second">
+			<h3>Or select a ready-made search</h2>
+			<p>These searches highlight specific organizations like the Hydro One and Toronto Transit Commission. They also highlight the highest earners across the entire list.</p>
+			<select id="pre-search" autocomplete="off">
+				<option>Top 25 salaries</option>
+				<option>Top 25 benefits</option>
+				<option>Hydro One</option>
+				<option>Toronto Transit Commission</option>				
+				<option>Toronto District School Board</option>
+				<option>City of Toronto - Police Service</option>
+				<option>City of Toronto</option>
+				<option>City of Ottawa</option>
+				<option>City of Mississauga</option>
+				<option>City of Hamilton</option>
+				<option>City of London</option>
+			</select>
+
+		</div>	
+	<div id="sunshine">
+		<div id="now-showing"><h3>Now showing: <span>Top 25 salaries</span></h3></div>
+		<table id="data-table"></table>
+	</div>
+
+</div>
